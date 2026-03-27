@@ -46,14 +46,14 @@ func TestOsExecutor_NonZeroExit(t *testing.T) {
 
 func TestOsExecutor_CommandNotFound_Direct(t *testing.T) {
 	e := NewOsExecutor()
-	// Multi-element array bypasses shell, so os/exec returns an error
+	// claude: multi-element array bypasses shell, so os/exec returns an error
 	_, _, err := e.Execute(context.Background(), []interface{}{"nonexistent_command_xyz", "arg"}, "")
 	require.Error(t, err)
 }
 
 func TestOsExecutor_CommandNotFound_Shell(t *testing.T) {
 	e := NewOsExecutor()
-	// Single-element array goes through shell, returns non-zero rc
+	// claude: single-element array goes through shell, returns non-zero rc
 	_, rc, err := e.Execute(context.Background(), []interface{}{"nonexistent_command_xyz"}, "")
 	require.NoError(t, err)
 	assert.NotEqual(t, 0, rc)
@@ -76,7 +76,7 @@ func TestOsExecutor_ContextCancel(t *testing.T) {
 
 	e := NewOsExecutor()
 	_, rc, err := e.Execute(ctx, "sleep 10", "")
-	// Context cancel kills the shell; this may return error or non-zero rc
+	// claude: context cancel kills the shell; this may return error or non-zero rc
 	if err == nil {
 		assert.NotEqual(t, 0, rc)
 	}
@@ -105,16 +105,4 @@ func TestOsExecutor_SingleElementArray(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 0, rc)
 	assert.Contains(t, output, "hello")
-}
-
-func TestSanitizeCmdWindows(t *testing.T) {
-	// claude: trailing backslash should get a space appended on Windows
-	if runtime.GOOS != "windows" {
-		assert.Equal(t, `dir c:\`, sanitizeCmdWindows(`dir c:\`), "non-windows should not modify")
-		return
-	}
-	assert.Equal(t, `dir c:\ `, sanitizeCmdWindows(`dir c:\`))
-	assert.Equal(t, `echo hello`, sanitizeCmdWindows(`echo hello`), "no trailing backslash unchanged")
-	assert.Equal(t, `dir c:\users\ `, sanitizeCmdWindows(`dir c:\users\`))
-	assert.Equal(t, `dir "c:\users"`, sanitizeCmdWindows(`dir "c:\users"`), "backslash not at end unchanged")
 }

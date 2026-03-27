@@ -7,7 +7,9 @@ import (
 	"os/exec"
 )
 
-// claude: buildShellCommand wraps a command string in /bin/sh -c on Unix.
-func buildShellCommand(ctx context.Context, cmdString string) *exec.Cmd {
-	return exec.CommandContext(ctx, "/bin/sh", "-c", cmdString)
+// buildShellCommand wraps a raw command string in /bin/sh -c.
+// On Unix, Go's argument handling is straightforward — no escaping
+// issues — so we pass the string directly.
+func buildShellCommand(ctx context.Context, raw string) (*exec.Cmd, func(), error) {
+	return exec.CommandContext(ctx, "/bin/sh", "-c", raw), nil, nil
 }
